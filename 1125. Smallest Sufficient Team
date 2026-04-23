@@ -1,0 +1,29 @@
+class Solution:
+    def smallestSufficientTeam(self, req_skills, people):
+        skill_index = {skill: i for i, skill in enumerate(req_skills)}
+        n = len(req_skills)
+        
+        # convert people skills to bitmask
+        people_mask = []
+        for person in people:
+            mask = 0
+            for skill in person:
+                if skill in skill_index:
+                    mask |= (1 << skill_index[skill])
+            people_mask.append(mask)
+        
+        dp = {0: []}  # mask -> team
+        
+        for i, p_mask in enumerate(people_mask):
+            new_dp = dp.copy()
+            
+            for mask, team in dp.items():
+                new_mask = mask | p_mask
+                
+                if new_mask not in new_dp or len(new_dp[new_mask]) > len(team) + 1:
+                    new_dp[new_mask] = team + [i]
+            
+            dp = new_dp
+        
+        full_mask = (1 << n) - 1
+        return dp[full_mask]
