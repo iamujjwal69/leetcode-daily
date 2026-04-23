@@ -1,0 +1,43 @@
+class NumArray:
+
+    def __init__(self, nums):
+        self.n = len(nums)
+        self.tree = [0] * (4 * self.n)
+        self.build(nums, 0, 0, self.n - 1)
+
+    def build(self, nums, node, start, end):
+        if start == end:
+            self.tree[node] = nums[start]
+        else:
+            mid = (start + end) // 2
+            self.build(nums, 2*node+1, start, mid)
+            self.build(nums, 2*node+2, mid+1, end)
+            self.tree[node] = self.tree[2*node+1] + self.tree[2*node+2]
+
+    def update(self, index, val):
+        self._update(0, 0, self.n - 1, index, val)
+
+    def _update(self, node, start, end, idx, val):
+        if start == end:
+            self.tree[node] = val
+        else:
+            mid = (start + end) // 2
+            if idx <= mid:
+                self._update(2*node+1, start, mid, idx, val)
+            else:
+                self._update(2*node+2, mid+1, end, idx, val)
+            
+            self.tree[node] = self.tree[2*node+1] + self.tree[2*node+2]
+
+    def sumRange(self, left, right):
+        return self._query(0, 0, self.n - 1, left, right)
+
+    def _query(self, node, start, end, L, R):
+        if R < start or end < L:
+            return 0
+        if L <= start and end <= R:
+            return self.tree[node]
+        
+        mid = (start + end) // 2
+        return (self._query(2*node+1, start, mid, L, R) +
+                self._query(2*node+2, mid+1, end, L, R))
