@@ -1,0 +1,52 @@
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.idx = -1
+
+
+class Solution:
+    def stringIndices(self, wordsContainer, wordsQuery):
+        
+        root = TrieNode()
+        
+        # global best (smallest length, earliest index)
+        best_idx = 0
+        for i in range(len(wordsContainer)):
+            if len(wordsContainer[i]) < len(wordsContainer[best_idx]):
+                best_idx = i
+        
+        root.idx = best_idx
+        
+        # insert reversed words
+        for i, word in enumerate(wordsContainer):
+            node = root
+            
+            rev = word[::-1]
+            
+            for ch in rev:
+                if ch not in node.children:
+                    node.children[ch] = TrieNode()
+                
+                node = node.children[ch]
+                
+                # update best index
+                cur = node.idx
+                
+                if (cur == -1 or
+                    len(word) < len(wordsContainer[cur]) or
+                    (len(word) == len(wordsContainer[cur]) and i < cur)):
+                    node.idx = i
+        
+        ans = []
+        
+        for word in wordsQuery:
+            node = root
+            
+            for ch in word[::-1]:
+                if ch not in node.children:
+                    break
+                node = node.children[ch]
+            
+            ans.append(node.idx)
+        
+        return ans
