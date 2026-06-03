@@ -1,0 +1,25 @@
+from typing import List
+
+class Solution:
+    def earliestFinishTime(
+        self,
+        landStartTime: List[int],
+        landDuration: List[int],
+        waterStartTime: List[int],
+        waterDuration: List[int]
+    ) -> int:
+
+        minLandFinish = min(s + d for s, d in zip(landStartTime, landDuration))
+        minWaterFinish = min(s + d for s, d in zip(waterStartTime, waterDuration))
+
+        ans = float('inf')
+
+        # Land -> Water
+        for ws, wd in zip(waterStartTime, waterDuration):
+            ans = min(ans, max(minLandFinish, ws) + wd)
+
+        # Water -> Land
+        for ls, ld in zip(landStartTime, landDuration):
+            ans = min(ans, max(minWaterFinish, ls) + ld)
+
+        return ans
