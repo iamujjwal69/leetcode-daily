@@ -1,0 +1,58 @@
+class Solution:
+    def maxTotalValue(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+
+        # Precompute logs
+        lg = [0] * (n + 1)
+        for i in range(2, n + 1):
+            lg[i] = lg[i // 2] + 1
+
+        LOG = lg[n] + 1
+
+        stMax = [[0] * n for _ in range(LOG)]
+        stMin = [[0] * n for _ in range(LOG)]
+
+        # Level 0
+        for i in range(n):
+            stMax[0][i] = nums[i]
+            stMin[0][i] = nums[i]
+
+        # Build Sparse Tables
+        for j in range(1, LOG):
+            length = 1 << j
+
+            for i in range(n - length + 1):
+
+                stMax[j][i] = max(stMax[j - 1][i],stMax[j - 1][i + (1 << (j - 1))])
+                stMin[j][i] = min(stMin[j - 1][i],stMin[j - 1][i + (1 << (j - 1))])
+
+        def getValue(l, r):
+            length = r - l + 1
+            p = lg[length]
+
+            mx = max(stMax[p][l],stMax[p][r - (1 << p) + 1])
+            mn = min(stMin[p][l],stMin[p][r - (1 << p) + 1])
+
+            return mx - mn
+
+        pq = []
+
+        # Initial candidates
+        for l in range(n):
+            heapq.heappush(pq,(-getValue(l, n - 1), l, n - 1))
+
+        ans = 0
+
+        while k:
+
+            neg_val, l, r = heapq.heappop(pq)
+            val = -neg_val
+
+            ans += val
+
+            if r > l:
+                heapq.heappush(pq,(-getValue(l, r - 1), l, r - 1))
+
+            k -= 1
+
+        return ans
