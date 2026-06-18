@@ -1,0 +1,42 @@
+class Solution:
+    def processStr(self, s: str, k: int) -> str:
+        lengths = [0] * (len(s) + 1)
+
+        # Compute length after each operation
+        for i, ch in enumerate(s):
+            cur = lengths[i]
+            if 'a' <= ch <= 'z':
+                lengths[i + 1] = cur + 1
+            elif ch == '*':
+                lengths[i + 1] = max(0, cur - 1)
+            elif ch == '#':
+                lengths[i + 1] = cur * 2
+            else:  # '%'
+                lengths[i + 1] = cur
+
+        if k >= lengths[-1]:
+            return '.'
+
+        # Work backwards
+        for i in range(len(s) - 1, -1, -1):
+            ch = s[i]
+            prev = lengths[i]
+            cur = lengths[i + 1]
+
+            if 'a' <= ch <= 'z':
+                if k == prev:
+                    return ch
+
+            elif ch == '*':
+                # Deleted last character, so existing indices stay unchanged
+                pass
+
+            elif ch == '#':
+                if k >= prev:
+                    k -= prev
+
+            else:  # '%'
+                if cur > 0:
+                    k = cur - 1 - k
+
+        return '.'
