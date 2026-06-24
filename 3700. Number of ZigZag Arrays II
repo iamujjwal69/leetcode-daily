@@ -1,0 +1,70 @@
+from typing import List
+
+class Solution:
+    def zigZagArrays(self, n: int, l: int, r: int) -> int:
+        MOD = 10**9 + 7
+
+        m = r - l + 1
+        sz = 2 * m
+
+        if n == 2:
+            return m * (m - 1) % MOD
+
+        T = [[0] * sz for _ in range(sz)]
+
+        for v in range(m):
+            for u in range(v):
+                T[v][m + u] = 1
+
+            for u in range(v + 1, m):
+                T[m + v][u] = 1
+
+        def mat_mul(A, B):
+            n1 = len(A)
+            n2 = len(B[0])
+            mid = len(B)
+
+            res = [[0] * n2 for _ in range(n1)]
+
+            for i in range(n1):
+                for k in range(mid):
+                    if A[i][k] == 0:
+                        continue
+
+                    aik = A[i][k]
+
+                    for j in range(n2):
+                        res[i][j] = (res[i][j] + aik * B[k][j]) % MOD
+
+            return res
+
+        def mat_pow(M, p):
+            size = len(M)
+
+            res = [[0] * size for _ in range(size)]
+            for i in range(size):
+                res[i][i] = 1
+
+            while p:
+                if p & 1:
+                    res = mat_mul(res, M)
+
+                M = mat_mul(M, M)
+                p >>= 1
+
+            return res
+
+        init = [[0] for _ in range(sz)]
+
+        for v in range(m):
+            init[v][0] = v
+            init[m + v][0] = m - 1 - v
+
+        P = mat_pow(T, n - 2)
+        final = mat_mul(P, init)
+
+        ans = 0
+        for i in range(sz):
+            ans = (ans + final[i][0]) % MOD
+
+        return ans
