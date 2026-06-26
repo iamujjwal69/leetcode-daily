@@ -1,0 +1,39 @@
+from typing import List
+
+class BIT:
+    def __init__(self, n):
+        self.n = n
+        self.bit = [0] * (n + 1)
+
+    def update(self, i, val):
+        while i <= self.n:
+            self.bit[i] += val
+            i += i & -i
+
+    def query(self, i):
+        s = 0
+        while i:
+            s += self.bit[i]
+            i -= i & -i
+        return s
+
+
+class Solution:
+    def countMajoritySubarrays(self, nums: List[int], target: int) -> int:
+        n = len(nums)
+        offset = n + 1
+        bit = BIT(2 * n + 5)
+
+        prefix = 0
+        ans = 0
+
+        bit.update(offset, 1)
+
+        for x in nums:
+            prefix += 1 if x == target else -1
+            idx = prefix + offset
+            ans += bit.query(idx - 1)
+            bit.update(idx, 1)
+
+        return ans
+        
