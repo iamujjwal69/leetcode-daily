@@ -1,0 +1,72 @@
+from typing import List
+
+class Solution:
+    def sumAndMultiply(self, s: str, queries: List[List[int]]) -> List[int]:
+        MOD = 10 ** 9 + 7
+        n = len(s)
+
+        # Store non-zero digits and their positions
+        digits = []
+        pos = []
+
+        for i, ch in enumerate(s):
+            if ch != '0':
+                digits.append(int(ch))
+                pos.append(i)
+
+        m = len(digits)
+
+        # Prefix sum of digits
+        pref_sum = [0] * (m + 1)
+        for i in range(m):
+            pref_sum[i + 1] = pref_sum[i] + digits[i]
+
+        # Powers of 10
+        pow10 = [1] * (m + 1)
+        for i in range(1, m + 1):
+            pow10[i] = (pow10[i - 1] * 10) % MOD
+
+        # Prefix concatenated number
+        pref_num = [0] * (m + 1)
+        for i in range(m):
+            pref_num[i + 1] = (pref_num[i] * 10 + digits[i]) % MOD
+
+        # first[i] = first non-zero digit index (in digits[]) whose position >= i
+        first = [-1] * n
+        p = 0
+        for i in range(n):
+            while p < m and pos[p] < i:
+                p += 1
+            if p < m:
+                first[i] = p
+
+        # last[i] = last non-zero digit index (in digits[]) whose position <= i
+        last = [-1] * n
+        p = m - 1
+        for i in range(n - 1, -1, -1):
+            while p >= 0 and pos[p] > i:
+                p -= 1
+            if p >= 0:
+                last[i] = p
+
+        ans = []
+
+        for l, r in queries:
+            L = first[l]
+            R = last[r]
+
+            if L == -1 or R == -1 or L > R:
+                ans.append(0)
+                continue
+
+            length = R - L + 1
+
+            # Concatenated number modulo MOD
+            x = (pref_num[R + 1] - pref_num[L] * pow10[length]) % MOD
+
+            # Sum of digits
+            sm = pref_sum[R + 1] - pref_sum[L]
+
+            ans.append((x * sm) % MOD)
+
+        return ans
